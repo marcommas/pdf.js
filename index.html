@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="PDF Viewer"/>
+
+    <title>PDF Viewer</title>
+
+    <script src="js/build/pdf.js') }}"></script>
+    <script src="js/build/pdf.worker.js') }}"></script>
+    <script>
+
+        //Função para mostrar todos os pdfs do arquivo
+        function renderPDF(url, canvasContainer, options) {
+            var options = options || {scale: 1};
+
+            function renderPage(page) {
+                var viewport = page.getViewport(options.scale);
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                var renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                canvasContainer.appendChild(canvas);
+
+                page.render(renderContext);
+            }
+
+            function renderPages(pdfDoc) {
+                for (var num = 1; num <= pdfDoc.numPages; num++)
+                    pdfDoc.getPage(num).then(renderPage);
+            }
+            PDFJS.disableWorker = true;
+            PDFJS.getDocument(url).then(renderPages);
+        }
+
+
+        //Mostra somente uma página do arquivo
+        PDFJS.disableStream = true;
+             
+        PDFJS.getDocument('/sample.pdf').then(function (pdf) {
+          //getPage é a pagina que será exivida
+          pdf.getPage(1).then(function (page) {
+            var scale = 1;
+            var viewport = page.getViewport(scale);
+
+            var canvas = document.getElementById('the-canvas');
+            //var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            var renderContext = {
+              canvasContext: context,
+              viewport: viewport
+            };
+            page.render(renderContext);
+            });
+        });
+    </script>
+
+</head>
+
+<body>
+
+  <!--Início mostra todos os arquivos do pdf -->
+  <div id="holder"></div>
+  
+  <script type="text/javascript">
+    renderPDF('sample.pdf', document.getElementById('holder'));
+  </script>
+  <!--Fim mostra todos os arquivos do pdf -->
+
+  <!--Mostra somente uma página do pdf -->
+  <canvas id="the-canvas" style="border:1px solid black;"/> 
+
+</body>
+</html>
